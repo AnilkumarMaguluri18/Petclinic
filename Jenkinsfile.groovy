@@ -2,26 +2,24 @@ pipeline {
     agent any
 
     stages {
-        stage('Debug') {
-            steps {
-                echo 'Starting Pipeline Debug'
-                echo "Git URL: ${params.GIT_URL}"
-                echo "Branch: ${params.BRANCH}"
-            }
-        }
-
         stage('Checkout') {
             steps {
-                echo 'Checking out code from Git'
-                git branch: params.BRANCH, url: params.GIT_URL
+                git 'https://github.com/AnilkumarMaguluri18/Petclinic.git'
             }
         }
 
-        // Other stages of your pipeline
-    }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
 
-    parameters {
-        string(name: 'GIT_URL', defaultValue: 'https://github.com/AnilkumarMaguluri18/Petclinic.git', description: 'Git repository URL')
-        string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch')
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube_Server_Name') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
     }
 }
